@@ -66,8 +66,12 @@ class _SuperMenuState extends State<SuperMenu> {
   void _registerFocusNode() {
     if (widget.focusNode != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.focusNode?.addListener(() {
-          _showMenu(context);
+        widget.focusNode!.addListener(() {
+          if (widget.focusNode!.hasFocus) {
+            _showMenu(context);
+          } else if (widget.focusNode!.hasFocus == false) {
+            _removeMenu();
+          }
         });
       });
     }
