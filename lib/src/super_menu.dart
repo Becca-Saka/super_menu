@@ -20,6 +20,7 @@ class SuperMenu extends StatefulWidget {
   final bool? compact;
   final TextStyle? headerStyle;
   final TextStyle? menuStyle;
+  final FocusNode? focusNode;
   const SuperMenu({
     super.key,
     required this.menuItems,
@@ -38,6 +39,7 @@ class SuperMenu extends StatefulWidget {
     this.compact,
     this.headerStyle,
     this.menuStyle,
+    this.focusNode,
   }) : assert(
           title != null || button != null,
           "Either title or button must be provided.",
@@ -55,6 +57,22 @@ class _SuperMenuState extends State<SuperMenu> {
   final GlobalKey _parentGlobalKey = GlobalKey();
   bool showingCompact = false;
   bool isCompact = false;
+  @override
+  void initState() {
+    _registerFocusNode();
+    super.initState();
+  }
+
+  void _registerFocusNode() {
+    if (widget.focusNode != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.focusNode?.addListener(() {
+          _showMenu(context);
+        });
+      });
+    }
+  }
+
   void _showSubMenu(BuildContext context, MenuActionItem item) {
     _removeSubMenu();
     final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
@@ -292,6 +310,12 @@ class _SuperMenuState extends State<SuperMenu> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.focusNode != null) {
+      return SizedBox(
+        key: _globalKey,
+        child: widget.button,
+      );
+    }
     return GestureDetector(
       key: _globalKey,
       onTap: () => _showMenu(context),
