@@ -167,7 +167,7 @@ class _SuperMenuState extends State<SuperMenu> {
     final spaceBottom = size.height - buttonPos.dy - buttonSize.height;
     final spaceTop = size.height - buttonPos.dy + buttonSize.height;
     double? maxItemHeight;
-
+    log('_showMenu called');
     double verticalPosition =
         size.height - (buttonPos.dy + buttonSize.height + itemHeight + 10);
     final useButtom = spaceBottom > itemHeight;
