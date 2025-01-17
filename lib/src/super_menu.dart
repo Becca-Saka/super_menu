@@ -290,8 +290,15 @@ class _SuperMenuState extends State<SuperMenu> {
   }
 
   void _clearMenu() {
-    _removeSubMenu();
-    _removeMenu();
+    if (widget.focusNode != null) {
+      if (widget.focusNode?.hasFocus != true) {
+        _removeSubMenu();
+        _removeMenu();
+      }
+    } else {
+      _removeSubMenu();
+      _removeMenu();
+    }
   }
 
   Future<void> _removeMenu() async {
