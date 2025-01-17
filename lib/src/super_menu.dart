@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import 'animated_menu_list.dart';
@@ -67,6 +69,7 @@ class _SuperMenuState extends State<SuperMenu> {
     if (widget.focusNode != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         widget.focusNode!.addListener(() {
+          log('focusNode ${widget.focusNode?.hasFocus}');
           if (widget.focusNode!.hasFocus) {
             _showMenu(context);
           } else if (widget.focusNode!.hasFocus == false) {
