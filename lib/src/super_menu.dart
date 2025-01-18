@@ -75,8 +75,6 @@ class _SuperMenuState extends State<SuperMenu> {
           if (widget.focusNode!.hasFocus) {
             searchedItems.clear();
             _showMenu(context);
-          } else if (widget.focusNode!.hasFocus == false) {
-            _removeMenu();
           }
         });
       });
