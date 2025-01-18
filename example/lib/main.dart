@@ -30,11 +30,12 @@ class _MainAppState extends State<MainApp> {
                 focusNode: focusNode,
                 // backgroundColor: Colors.red,
                 menuWidth: 200,
-                button: SizedBox(
+                inputButtonBuilder: (onChanged) => SizedBox(
                   width: 150,
                   height: 40,
                   child: TextField(
                     focusNode: focusNode,
+                    onChanged: onChanged,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Search',
@@ -46,7 +47,7 @@ class _MainAppState extends State<MainApp> {
                   MenuActionItem(
                     title: 'Item 1',
                     subMenuItems: [
-                      MenuActionItem(title: 'Item 1.1'),
+                      MenuActionItem(title: 'Amazing'),
                       MenuActionItem(title: 'Item 1.2'),
                       MenuActionItem(title: 'Item 1.3'),
                     ],
@@ -54,7 +55,7 @@ class _MainAppState extends State<MainApp> {
                   MenuActionItem(
                     title: 'Item 2',
                     subMenuItems: [
-                      MenuActionItem(title: 'Item 2.1'),
+                      MenuActionItem(title: 'Fantasi'),
                       MenuActionItem(title: 'Item 2.2'),
                       MenuActionItem(title: 'Item 2.3'),
                     ],

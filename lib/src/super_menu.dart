@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import 'animated_menu_list.dart';
@@ -12,6 +10,8 @@ class SuperMenu extends StatefulWidget {
   final Widget? button;
   final Widget? Function(Widget child)? animationBuilder;
   final Widget? Function(MenuActionItem?)? headerBuilder;
+  final Widget? Function(ValueChanged<String>)? inputButtonBuilder;
+
   final double? menuWidth;
   final double? menuHeight;
   final Color? backgroundColor;
@@ -42,9 +42,10 @@ class SuperMenu extends StatefulWidget {
     this.headerStyle,
     this.menuStyle,
     this.focusNode,
+    this.inputButtonBuilder,
   }) : assert(
-          title != null || button != null,
-          "Either title or button must be provided.",
+          title != null || button != null || inputButtonBuilder != null,
+          "Either title or button or inputButtonBuilder must be provided.",
         );
 
   @override
@@ -59,6 +60,8 @@ class _SuperMenuState extends State<SuperMenu> {
   final GlobalKey _parentGlobalKey = GlobalKey();
   bool showingCompact = false;
   bool isCompact = false;
+
+  List<MenuActionItem> searchedItems = [];
   @override
   void initState() {
     _registerFocusNode();
@@ -66,11 +69,11 @@ class _SuperMenuState extends State<SuperMenu> {
   }
 
   void _registerFocusNode() {
-    if (widget.focusNode != null) {
+    if (widget.focusNode != null && widget.inputButtonBuilder != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         widget.focusNode!.addListener(() {
-          log('focusNode ${widget.focusNode?.hasFocus}');
           if (widget.focusNode!.hasFocus) {
+            searchedItems.clear();
             _showMenu(context);
           } else if (widget.focusNode!.hasFocus == false) {
             _removeMenu();
@@ -160,14 +163,16 @@ class _SuperMenuState extends State<SuperMenu> {
     final button = _globalKey.currentContext?.findRenderObject() as RenderBox;
 
     final buttonPos = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final itemHeight = widget.menuItems.length * 50;
+    double itemHeight = widget.menuItems.length * 50;
+    if (searchedItems.isNotEmpty) {
+      itemHeight = searchedItems.length * 65;
+    }
 
     final size = MediaQuery.of(context).size;
     final buttonSize = button.size;
     final spaceBottom = size.height - buttonPos.dy - buttonSize.height;
     final spaceTop = size.height - buttonPos.dy + buttonSize.height;
     double? maxItemHeight;
-    log('_showMenu called');
     double verticalPosition =
         size.height - (buttonPos.dy + buttonSize.height + itemHeight + 10);
     final useButtom = spaceBottom > itemHeight;
@@ -263,6 +268,7 @@ class _SuperMenuState extends State<SuperMenu> {
                 verticalPosition: verticalPosition,
                 onHover: onHover,
                 items: items,
+                searchedItems: searchedItems,
                 onRemoveOverlay: onRemoveOverlay,
                 onSelected: onSelected,
                 maxItemHeight: maxItemHeight,
@@ -293,10 +299,11 @@ class _SuperMenuState extends State<SuperMenu> {
   }
 
   void _clearMenu() {
-    if (widget.focusNode != null) {
+    if (widget.focusNode != null && widget.inputButtonBuilder != null) {
       if (widget.focusNode?.hasFocus != true) {
         _removeSubMenu();
         _removeMenu();
+        searchedItems.clear();
       }
     } else {
       _removeSubMenu();
@@ -316,6 +323,33 @@ class _SuperMenuState extends State<SuperMenu> {
     activeItem = null;
   }
 
+  void _filterItems(String value) {
+    searchedItems.clear();
+    if (value.isNotEmpty) {
+      final mainSearchedItem = widget.menuItems
+          .where((item) => item.title.toLowerCase().contains(value))
+          .map((item) => item.copyWith(searchType: SearchType.parent))
+          .toList();
+      final subSearchedItems = widget.menuItems
+          .where((item) =>
+              item.subMenuItems.isNotEmpty &&
+              item.subMenuItems
+                  .any((title) => title.title.toLowerCase().contains(value)))
+          .map((item) {
+        final subtitleItem = item.subMenuItems.firstWhere(
+            (element) => element.title.toLowerCase().contains(value));
+
+        return subtitleItem.copyWith(
+          searchType: SearchType.subtitle,
+          parentItem: item,
+        );
+      }).toList();
+      searchedItems = [...mainSearchedItem, ...subSearchedItems];
+    }
+    setState(() {});
+    _showMenu(context);
+  }
+
   @override
   void dispose() {
     _clearMenu();
@@ -324,11 +358,10 @@ class _SuperMenuState extends State<SuperMenu> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.focusNode != null) {
+    if (widget.focusNode != null && widget.inputButtonBuilder != null) {
       return SizedBox(
-        key: _globalKey,
-        child: widget.button,
-      );
+          key: _globalKey,
+          child: widget.inputButtonBuilder!.call(_filterItems));
     }
     return GestureDetector(
       key: _globalKey,

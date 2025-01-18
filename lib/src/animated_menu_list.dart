@@ -15,6 +15,7 @@ class AnimatedMenuList extends StatefulWidget {
     this.maxItemHeight,
     this.compact = false,
     this.item,
+    this.searchedItems,
     this.onHeaderTap,
     this.animationBuilder,
     this.menuWidth,
@@ -31,6 +32,7 @@ class AnimatedMenuList extends StatefulWidget {
   final double horizontalPosition;
   final double verticalPosition;
   final List<MenuActionItem> items;
+  final List<MenuActionItem>? searchedItems;
   final MenuActionItem? item;
   final Function(MenuActionItem)? onHover;
   final Function()? onRemoveOverlay;
@@ -108,6 +110,7 @@ class _AnimatedMenuListState extends State<AnimatedMenuList>
       menuWidth: widget.menuWidth,
       maxItemHeight: widget.maxItemHeight,
       items: widget.items,
+      searchedItems: widget.searchedItems,
       onHover: widget.onHover,
       onRemoveOverlay: widget.onRemoveOverlay,
       onSelected: widget.onSelected,

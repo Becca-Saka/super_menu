@@ -6,6 +6,7 @@ class MenuWrapper extends StatelessWidget {
   final double horizontalPosition;
   final double verticalPosition;
   final List<MenuActionItem> items;
+  final List<MenuActionItem>? searchedItems;
   final MenuActionItem? item;
   final Function(MenuActionItem)? onHover;
   final Function()? onRemoveOverlay;
@@ -50,6 +51,7 @@ class MenuWrapper extends StatelessWidget {
     this.headerStyle,
     this.menuStyle,
     this.onTitleSelected,
+    this.searchedItems,
   });
 
   @override
@@ -118,21 +120,40 @@ class MenuWrapper extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: addTitleHeader && compact ? 8 : 0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: items.map(
-                    (subItem) {
-                      return _MenuItem(
-                        width: menuHeight,
-                        height: menuHeight,
-                        item: subItem,
-                        onHover: onHover,
-                        onSelected: onSelected,
-                        style: menuStyle,
-                      );
-                    },
-                  ).toList(),
-                ),
+                child: Builder(builder: (context) {
+                  if (searchedItems != null && searchedItems!.isNotEmpty) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: searchedItems!.map(
+                        (subItem) {
+                          return _MenuItem(
+                            width: menuHeight,
+                            height: menuHeight,
+                            item: subItem,
+                            onHover: onHover,
+                            onSelected: onSelected,
+                            style: menuStyle,
+                          );
+                        },
+                      ).toList(),
+                    );
+                  }
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: items.map(
+                      (subItem) {
+                        return _MenuItem(
+                          width: menuHeight,
+                          height: menuHeight,
+                          item: subItem,
+                          onHover: onHover,
+                          onSelected: onSelected,
+                          style: menuStyle,
+                        );
+                      },
+                    ).toList(),
+                  );
+                }),
               ),
             ),
           ),
@@ -168,17 +189,30 @@ class _MenuItem extends StatelessWidget {
         },
         child: Container(
           width: width ?? 200,
-          height: height ?? 50,
+          height: height ?? (item.searchType == SearchType.subtitle ? 65 : 50),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  item.title,
-                  style: style,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: style,
+                    ),
+                    if (item.searchType != null &&
+                        item.searchType == SearchType.subtitle &&
+                        item.parentItem != null)
+                      Text(
+                        item.parentItem!.title,
+                        style: style?.copyWith(fontSize: 12) ??
+                            const TextStyle(fontSize: 12),
+                      ),
+                  ],
                 ),
               ),
-              if (item.subMenuItems.isNotEmpty)
+              if (item.subMenuItems.isNotEmpty && item.searchType == null)
                 const Icon(Icons.chevron_right, size: 16),
             ],
           ),
